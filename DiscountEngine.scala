@@ -1,4 +1,6 @@
 import java.io.{File, FileOutputStream, PrintWriter}
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import scala.io.{BufferedSource, Source}
 
 object DiscountEngine extends App{
@@ -26,6 +28,62 @@ object DiscountEngine extends App{
         Order(parsedLine(0), parsedLine(1), parsedLine(2), Integer.parseInt(parsedLine(3)), parsedLine(4).toDouble, parsedLine(5), parsedLine(6))
     }
 
+    /** Formats the transaction date of each order.
+     *
+     * Takes the transaction date as a '''String'''.
+     * Splits it to get the date without the time.
+     * Converts it into '''LocalDate'''.
+     */
+    def transactionDateFormatter(transDate: String): LocalDate = {
+        val orderTransactionDate = transDate.split("T")(0)
+        val formatterDateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        LocalDate.parse(orderTransactionDate, formatterDateTime)
+    }
+
+    /** Formats the expiry date of each product.
+     *
+     * Takes the expiry date as a '''String'''.
+     * Converts it into '''LocalDate'''.
+     */
+    def expiryDateFormatter(expiryDate: String): LocalDate = {
+        val formatterDateTime2 = DateTimeFormatter.ofPattern("M/d/yyyy")
+        LocalDate.parse(expiryDate, formatterDateTime2)
+    }
+
+    /** Checks the qualifying rule number 1: Whether the order is about to expire or not.
+     *
+     * Takes an order of type '''Order'''.
+     * Gets the difference in days between the transaction day of the order and the expiry day of the product.
+     * Return boolean value, it it's about to expire (less than 30 days) it returns true, else it returns false.
+     */
+    def isAboutToExpire(order: Order): Boolean = {
+        // Get the difference between transaction date and expiry date
+        val daysBetween = (expiryDateFormatter(order.expiry_date).toEpochDay - transactionDateFormatter(order.timestamp).toEpochDay).toInt
+
+        // Check the qualifying rule
+        if (daysBetween >= 30) false
+        else true
+    }
+
+    /** Performs the calculation rule number 1: The discount according to the number of days remaining until the product is expired.
+     *
+     * Takes an order of type '''Order'''.
+     * Gets the difference in days between the transaction day of the order and the expiry day of the product.
+     * Calculates the discount percentage which is (30 - the number of days).
+     * Returns the final price after applying the discount.
+     */
+    def expiryDiscount(order: Order): Double = {
+        // Get the difference between transaction date and expiry date
+        val daysBetween = (expiryDateFormatter(order.expiry_date).toEpochDay - transactionDateFormatter(order.timestamp).toEpochDay).toInt
+
+        // Perform the calculation rule
+        val discountPerc: Double = (30 - daysBetween)
+        //println(s"Number of days = ${daysBetween}. You got a discount of ${discountPerc}%!")
+        val finalPrice = BigDecimal(order.quantity * order.unit_price * (100 - discountPerc) / 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+        //println(s"Order before discount has a price of ${order.quantity * order.unit_price} LE. After discount = ${finalPrice}")
+        finalPrice
+    }
+
     /** Converts an object of type '''Order''' to a '''String''' written in a defined format.
      *
      * Takes an object of the type '''Order'''.
@@ -51,6 +109,6 @@ object DiscountEngine extends App{
     }
 
     // Call the functions to be run on each order.
-    orders.map(toOrder).map(processed_order).foreach(writeLine)
+    orders.map(toOrder).map(processed_order).map(writeLine)
     writer.close()
 }
