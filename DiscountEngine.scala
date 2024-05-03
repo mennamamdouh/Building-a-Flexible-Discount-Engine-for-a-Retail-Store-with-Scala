@@ -133,6 +133,37 @@ object DiscountEngine extends App{
         BigDecimal(order.quantity * order.unit_price * 0.5).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     }
 
+    /** Checks the qualifying rule number 4: Whether the quantity of the product is more than 5.
+     *
+     * Takes an order of type '''Order'''.
+     * Returns true if it has more than 5 units of the product, and false if not.
+     */
+    def isMoreThanFive(order: Order): Boolean = {
+        // Check the qualifying rule
+        if (order.quantity > 5) true
+        else false
+    }
+
+    /** Performs the calculation rule number 4: The discount depends on the quantity.
+     *
+     * Takes an order of type '''Order'''.
+     * Calculates the discount percentage as: 5% if 6-9 units, 7% if 10-14 units, 10% if more than 15 units
+     */
+    def moreThanFiveDiscount(order: Order): Double = {
+        if (order.quantity >= 6 && order.quantity <= 9) {
+            //println(s"You got ${order.quantity} of the same product. You got a discount of 5%.")
+            BigDecimal(order.quantity * order.unit_price * 0.95).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+        }
+        else if (order.quantity >= 10 && order.quantity <= 14) {
+            //println(s"You got ${order.quantity} of the same product. You got a discount of 7%.")
+            BigDecimal(order.quantity * order.unit_price * 0.93).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+        }
+        else {
+            //println(s"You got ${order.quantity} of the same product. You got a discount of 10%.")
+            BigDecimal(order.quantity * order.unit_price * 0.9).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+        }
+    }
+
     /** Converts an object of type '''Order''' to a '''String''' written in a defined format.
      *
      * Takes an object of the type '''Order'''.
