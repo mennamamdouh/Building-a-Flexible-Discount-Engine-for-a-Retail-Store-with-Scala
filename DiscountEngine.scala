@@ -112,6 +112,27 @@ object DiscountEngine extends App{
         }
     }
 
+    /** Checks the qualifying rule number 3: Whether we're on 23rd March or not.
+     *
+     * Takes an order of type '''Order'''.
+     * Returns true if the transaction day is 23rd March, and false if not.
+     */
+    def isOnSpecialDay(order: Order): Boolean = {
+        // Check the qualifying rule
+        if (transactionDateFormatter(order.timestamp).getDayOfMonth == 23 && transactionDateFormatter(order.timestamp).getMonthValue == 3) true
+        else false
+    }
+
+    /** Performs the calculation rule number 3: The discount is 50%.
+     *
+     * Takes an order of type '''Order'''.
+     * Calculates the discount percentage and returns the final price after applying the discount.
+     */
+    def specialDayDiscount(order: Order): Double = {
+        //println(s"We're on a special day! Discount is 50%. Final price = ${order.quantity * order.unit_price * 0.5}")
+        BigDecimal(order.quantity * order.unit_price * 0.5).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+    }
+
     /** Converts an object of type '''Order''' to a '''String''' written in a defined format.
      *
      * Takes an object of the type '''Order'''.
