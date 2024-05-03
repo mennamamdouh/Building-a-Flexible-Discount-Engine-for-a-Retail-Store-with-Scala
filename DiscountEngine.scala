@@ -84,6 +84,34 @@ object DiscountEngine extends App{
         finalPrice
     }
 
+    /** Checks the qualifying rule number 2: Whether the product is cheese or wine.
+     *
+     * Takes an order of type '''Order'''.
+     * Returns true if it is a cheese or wine product, and false if not.
+     */
+    def isCheeseOrWine(order: Order): Boolean = {
+        // Check the qualifying rule
+        if (order.product_name.startsWith("Cheese") || order.product_name.startsWith("Wine")) true
+        else false
+    }
+
+    /** Performs the calculation rule number 2: The discount is 10% for cheese & 5% for wine.
+     *
+     * Takes an order of type '''Order'''.
+     * Calculates the discount percentage according to the product type.
+     * Returns the final price after applying the discount.
+     */
+    def cheeseOrWineDiscount(order: Order): Double = {
+        // Perform the calculation rule after chechking the product's category
+        if (order.product_name.startsWith("Cheese")) {
+            //println(s"Discount is 10%. Final price = ${order.quantity * order.unit_price * 0.9}")
+            BigDecimal(order.quantity * order.unit_price * 0.1).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+        } else {
+            //println(s"Discount is 5%. Final price = ${order.quantity * order.unit_price * 0.95}")
+            BigDecimal(order.quantity * order.unit_price * 0.05).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+        }
+    }
+
     /** Converts an object of type '''Order''' to a '''String''' written in a defined format.
      *
      * Takes an object of the type '''Order'''.
