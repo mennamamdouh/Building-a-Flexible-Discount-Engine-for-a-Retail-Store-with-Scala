@@ -59,7 +59,6 @@ object DiscountEngine extends App{
     def isAboutToExpire(order: Order): Boolean = {
         // Get the difference between transaction date and expiry date
         val daysBetween = (expiryDateFormatter(order.expiry_date).toEpochDay - transactionDateFormatter(order.timestamp).toEpochDay).toInt
-
         // Check the qualifying rule
         if (daysBetween >= 30) false
         else true
@@ -75,13 +74,9 @@ object DiscountEngine extends App{
     def expiryDiscount(order: Order): Double = {
         // Get the difference between transaction date and expiry date
         val daysBetween = (expiryDateFormatter(order.expiry_date).toEpochDay - transactionDateFormatter(order.timestamp).toEpochDay).toInt
-
         // Perform the calculation rule
         val discountPerc: Double = (30 - daysBetween)
-        //println(s"Number of days = ${daysBetween}. You got a discount of ${discountPerc}%!")
-        val finalPrice = BigDecimal(order.quantity * order.unit_price * (100 - discountPerc) / 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        //println(s"Order before discount has a price of ${order.quantity * order.unit_price} LE. After discount = ${finalPrice}")
-        finalPrice
+        BigDecimal(order.quantity * order.unit_price * discountPerc / 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     }
 
     /** Checks the qualifying rule number 2: Whether the product is cheese or wine.
@@ -103,13 +98,10 @@ object DiscountEngine extends App{
      */
     def cheeseOrWineDiscount(order: Order): Double = {
         // Perform the calculation rule after chechking the product's category
-        if (order.product_name.startsWith("Cheese")) {
-            //println(s"Discount is 10%. Final price = ${order.quantity * order.unit_price * 0.9}")
+        if (order.product_name.startsWith("Cheese"))
             BigDecimal(order.quantity * order.unit_price * 0.1).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        } else {
-            //println(s"Discount is 5%. Final price = ${order.quantity * order.unit_price * 0.95}")
+        else
             BigDecimal(order.quantity * order.unit_price * 0.05).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        }
     }
 
     /** Checks the qualifying rule number 3: Whether we're on 23rd March or not.
@@ -129,7 +121,6 @@ object DiscountEngine extends App{
      * Calculates the discount percentage and returns the final price after applying the discount.
      */
     def specialDayDiscount(order: Order): Double = {
-        //println(s"We're on a special day! Discount is 50%. Final price = ${order.quantity * order.unit_price * 0.5}")
         BigDecimal(order.quantity * order.unit_price * 0.5).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     }
 
@@ -150,18 +141,12 @@ object DiscountEngine extends App{
      * Calculates the discount percentage as: 5% if 6-9 units, 7% if 10-14 units, 10% if more than 15 units
      */
     def moreThanFiveDiscount(order: Order): Double = {
-        if (order.quantity >= 6 && order.quantity <= 9) {
-            //println(s"You got ${order.quantity} of the same product. You got a discount of 5%.")
-            BigDecimal(order.quantity * order.unit_price * 0.95).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        }
-        else if (order.quantity >= 10 && order.quantity <= 14) {
-            //println(s"You got ${order.quantity} of the same product. You got a discount of 7%.")
-            BigDecimal(order.quantity * order.unit_price * 0.93).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        }
-        else {
-            //println(s"You got ${order.quantity} of the same product. You got a discount of 10%.")
-            BigDecimal(order.quantity * order.unit_price * 0.9).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        }
+        if (order.quantity >= 6 && order.quantity <= 9)
+            BigDecimal(order.quantity * order.unit_price * 0.05).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+        else if (order.quantity >= 10 && order.quantity <= 14)
+            BigDecimal(order.quantity * order.unit_price * 0.07).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+        else
+            BigDecimal(order.quantity * order.unit_price * 0.1).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     }
 
     /** Converts an object of type '''Order''' to a '''String''' written in a defined format.
