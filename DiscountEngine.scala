@@ -1,7 +1,7 @@
 package discountengine
 import CriteriaFunctions._
+import DBConnection._
 
-import java.io.{File, FileOutputStream, PrintWriter}
 import scala.io.{BufferedSource, Source}
 
 object DiscountEngine extends App{
@@ -10,11 +10,8 @@ object DiscountEngine extends App{
     val orders: List[String] = source.getLines().drop(1).toList
     //orders.foreach(println)
 
-    // Define the target file which in the final results will be written.
-    val f: File = new File("src/main/resources/processed_orders.csv")
-    val heading = s"timestamp,product_name,expiry_date,quantity,unit_price,channel,payment_method,final_price"
-    val writer = new PrintWriter(new FileOutputStream(f,false))
-    writer.write(heading)
+    // Get a connection to the target database which in the final results will be stored.
+    val conn: java.sql.Connection = getConnection()
 
     /** Stores the attributes of each order with specified data types. */
     case class Order(timestamp: String, product_name: String, expiry_date: String, quantity: Int, unit_price: Double, channel: String, payment_method: String)
@@ -31,18 +28,19 @@ object DiscountEngine extends App{
 
     /** Calculates the final discount that will be applied on each order.
      *
-     * Takes the order of type '''Order''', and a list of tuples represents each qualifying and caluclation rule pair.
+     * Takes the order of type '''Order''', and a list of tuples represents each qualifying and calculation rule pair.
      * Filters the orders which pass the qualifying rules, then maps them to the corresponding calculation rules.
-     * After checking all qualifying rules and calculates the discounts, it takes the top 2 discounts and gets their average.
+     * Checks if there's any discount applied, it calculates the final price after adding the discounts.
+     * Final discount = average of the top 2 discounts.
+     * Finally, it writes the order's information with the final price to the database.
      */
     def getOrderWithDiscount(order: Order, listOfRules: List[(Order => Boolean, Order => Double)]): Unit = {
-        println(processed_order(order))
         val topTwoDiscounts = listOfRules.filter(_._1(order)).map(_._2(order)).take(2)
-        if (topTwoDiscounts.isEmpty) println("This order has a discount of 0 LE.")
+        if (topTwoDiscounts.isEmpty)
+            writeToDB(conn, order, BigDecimal((order.quantity * order.unit_price)).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
         else {
             val finalDiscount = topTwoDiscounts.sum / topTwoDiscounts.length
-            val finalPrice = BigDecimal((order.quantity * order.unit_price) - finalDiscount).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-            println(s"This order has a discount of ${finalDiscount} LE. Final price = ${finalPrice}")
+            writeToDB(conn, order, BigDecimal((order.quantity * order.unit_price) - finalDiscount).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
         }
     }
 
@@ -55,31 +53,7 @@ object DiscountEngine extends App{
             (isMoreThanFive, moreThanFiveDiscount))
     }
 
-    /** Converts an object of type '''Order''' to a '''String''' written in a defined format.
-     *
-     * Takes an object of the type '''Order'''.
-     * Concats its attributes in a single line of type '''String''' after adding the final price of the order to the end of the line.
-     */
-    def processed_order(order: Order): String = {
-        s"${order.timestamp}," +
-          s"${order.product_name}," +
-          s"${order.expiry_date}," +
-          s"${order.quantity}," +
-          s"${order.unit_price}," +
-          s"${order.channel}," +
-          s"${order.payment_method}," +
-          s"0"
-    }
-
-    /** Writes to the target file.
-     *
-     * Takes the processed order as a line of type '''String''' and writes it to the target file.
-     */
-    def writeLine(line: String): Unit = {
-        writer.write("\n"+line)
-    }
-
     // Call the functions to be run on each order.
     orders.map(toOrder).map(x => getOrderWithDiscount(x, getDiscountRules))
-    writer.close()
+    closeConnection(conn)
 }
