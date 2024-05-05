@@ -28,6 +28,32 @@ object DiscountEngine extends App{
         Order(parsedLine(0), parsedLine(1), parsedLine(2), Integer.parseInt(parsedLine(3)), parsedLine(4).toDouble, parsedLine(5), parsedLine(6))
     }
 
+    /** Calculates the final discount that will be applied on each order.
+     *
+     * Takes the order of type '''Order''', and a list of tuples represents each qualifying and caluclation rule pair.
+     * Filters the orders which pass the qualifying rules, then maps them to the corresponding calculation rules.
+     * After checking all qualifying rules and calculates the discounts, it takes the top 2 discounts and gets their average.
+     */
+    def getOrderWithDiscount(order: Order, listOfRules: List[(Order => Boolean, Order => Double)]): Unit = {
+        println(processed_order(order))
+        val topTwoDiscounts = listOfRules.filter(_._1(order)).map(_._2(order)).take(2)
+        if (topTwoDiscounts.isEmpty) println("This order has a discount of 0 LE.")
+        else {
+            val finalDiscount = topTwoDiscounts.sum / topTwoDiscounts.length
+            val finalPrice = BigDecimal((order.quantity * order.unit_price) - finalDiscount).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+            println(s"This order has a discount of ${finalDiscount} LE. Final price = ${finalPrice}")
+        }
+    }
+
+    /** Get a list of the qualifying and calculation rule pairs as list of tuples. */
+    def getDiscountRules: List[(Order => Boolean, Order => Double)] = {
+        List(
+            (isAboutToExpire, expiryDiscount),
+            (isCheeseOrWine, cheeseOrWineDiscount),
+            (isOnSpecialDay, specialDayDiscount),
+            (isMoreThanFive, moreThanFiveDiscount))
+    }
+
     /** Formats the transaction date of each order.
      *
      * Takes the transaction date as a '''String'''.
@@ -174,6 +200,6 @@ object DiscountEngine extends App{
     }
 
     // Call the functions to be run on each order.
-    orders.map(toOrder).map(processed_order).map(writeLine)
+    orders.map(toOrder).map(x => getOrderWithDiscount(x, getDiscountRules))
     writer.close()
 }
