@@ -36,11 +36,12 @@ object DiscountEngine extends App{
      */
     def getOrderWithDiscount(order: Order, listOfRules: List[(Order => Boolean, Order => Double)]): Unit = {
         val topTwoDiscounts = listOfRules.filter(_._1(order)).map(_._2(order)).take(2)
+        val priceBeforeDiscount = BigDecimal((order.quantity * order.unit_price)).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
         if (topTwoDiscounts.isEmpty)
-            writeToDB(conn, order, BigDecimal((order.quantity * order.unit_price)).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
+            writeToDB(conn, order, priceBeforeDiscount, priceBeforeDiscount)
         else {
             val finalDiscount = topTwoDiscounts.sum / topTwoDiscounts.length
-            writeToDB(conn, order, BigDecimal((order.quantity * order.unit_price) - finalDiscount).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
+            writeToDB(conn, order, priceBeforeDiscount, BigDecimal(priceBeforeDiscount - finalDiscount).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
         }
     }
 

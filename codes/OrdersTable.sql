@@ -6,5 +6,6 @@ CREATE TABLE ORDERS (
     UnitPrice DECIMAL(10, 2),
     Channel VARCHAR2(20),
     PaymentMethod VARCHAR2(20),
+    PriceBeforeDiscount DECIMAL(10, 2),
     FinalPrice DECIMAL(10, 2)
 )

@@ -20,9 +20,9 @@ object DBConnection {
         DriverManager.getConnection(jdbcUrl, username, password)
     }
 
-    def writeToDB(conn: java.sql.Connection, order: Order, finalPrice: Double) {
+    def writeToDB(conn: java.sql.Connection, order: Order, priceBeforeDiscount: Double, finalPrice: Double) {
         // Define the statement and the parameters that will be inserted
-        val statement = conn.prepareStatement("INSERT INTO ORDERS VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        val statement = conn.prepareStatement("INSERT INTO ORDERS VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
         statement.setString(1, order.timestamp)
         statement.setString(2, order.product_name)
         statement.setString(3, order.expiry_date)
@@ -30,7 +30,8 @@ object DBConnection {
         statement.setDouble(5, order.unit_price)
         statement.setString(6, order.channel)
         statement.setString(7, order.payment_method)
-        statement.setDouble(8, finalPrice)
+        statement.setDouble(8, priceBeforeDiscount)
+        statement.setDouble(9, finalPrice)
 
         // Execute the statement
         statement.executeUpdate()
