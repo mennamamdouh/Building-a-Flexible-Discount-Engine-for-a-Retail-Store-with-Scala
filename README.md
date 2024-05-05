@@ -45,16 +45,49 @@ Data source is simply a *csv* file which contains some orders' information such 
 * Expiry date of the product
 * Quantity of the product
 * Unit price of the product
-* Channel of the order
-    * Store
-    * App
-* Payment method
-    * Cash
-    * Visa
+* Channel of the order &rarr; Store - App
+* Payment method &rarr; Cash - Visa
 
 To explore the data and download it please check [TRX1000.csv](data/TRX1000.csv) file.
 
 ## Code Explaination ##
 
+The program's code is divided into `3` files, [DiscountEngine](codes/DiscountEngine.scala), [CriteriaFunctions](codes/CriteriaFunctions.scala), and [DBConnection](codes/DBConnection.scala).
+
+* __`DiscountEngine`__: Has the main flow of the program.
+    * Reading the orders' data from a `csv` file
+    * Parsing each line as an object of __Order__ datatype
+    * Applying a list of qualifying and calculation rules paris to each order
+    * Calculates the final discount of the order
+        > Final discount is the average of the top 2 discounts.
+    * Finally storing orders with *the price before discount* and *the final price after applying the discount* into an `Oracle table`.
+
+* __`CriteriaFunctions`__: Has all the qualifying rules and their corresponding calculation rules.
+    * All qualifying rules takes an object of __Order__ data type and returns `true` if it satisfies the rule, and `false` if not.
+    * All calculation rules takes an object of __Order__ data type (that satisfied the corresponding qualifying rule) and returns a `decimal` value which represents the discount that may be applied on that order.
+
+* __`DBConnection`__: Has the database functionalities such as *openning a database connection*, *writing into __Orders__ table*, and *closing the connection*.
+
+In [codes](codes/) directory, there's another `sql` file which is [OrdersTable](codes/OrdersTable.sql). It containes the creation code of the table on Oracle DBMS.
+
+> __Note__: All codes are well-commented and all functions are well-explained using `scaladoc`.
 
 ## How to run the project ? ##
+
+1. Download the project folder [DiscountEngine](IntelliJ/DiscountEngine/) under the [IntelliJ](IntelliJ/) directory.
+
+2. Open it using __IntelliJ Community Edition__ software.
+
+3. Download the required libraries under the [libraries](libraries/) directory.
+
+    a. `ojdbc7-12.1.0.2` to connect to Oracle DBMS.
+        
+    > It's compatible with `Oracle Database 11g Express Edition Release 11.2.0.2.0` and `Java SE 8 - jdk8`. If you've another versions, find the proper JDBC version.
+
+    b. `kotlin-stdlib-1.4.0`, `java-dotenv-5.2.2`, and `annotations-13.0` to hanle the environment variables. [Optional]
+
+4. Import the libraries in IntelliJ through __Files &rarr; Project Structure &rarr; Modules &rarr; Dependencies__.
+
+5. Replace your database credentials in the [.env](IntelliJ/DiscountEngine/src/main/scala/.env) file, or you can add them inside the [DBConnection](codes/DBConnection.scala) file itself by assigning them to the varibales.
+
+6. Run the code, explore the data inserted into the Orders table inside the database, and enjoy your __Discount Engine__ !
