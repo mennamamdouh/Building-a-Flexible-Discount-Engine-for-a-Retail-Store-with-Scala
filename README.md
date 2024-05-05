@@ -10,7 +10,7 @@ As mentioned above, the retail store has many orders to add discount  to them ac
 
 __Let's dig deeper into the discount engine qualifying rules and their corresponding calculation rules:__
 <div align="center">
-  <img src="Discount Criteria.png" alt="Image">
+  <img src="images/Discount Criteria.png" alt="Image">
   <p><em>Discount Engine Criteria: Qualifying Rules and their corresponding Calculation Rules</em></p>
 </div>
 
@@ -52,7 +52,7 @@ Data source is simply a *csv* file which contains some orders' information such 
     * Cash
     * Visa
 
-To explore the data and download it please check [TRX1000.csv](TRX1000.csv) file.
+To explore the data and download it please check [TRX1000.csv](data/TRX1000.csv) file.
 
 ## Code Explaination ##
 
