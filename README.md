@@ -59,9 +59,7 @@ The program's code is divided into `3` files, [DiscountEngine](codes/DiscountEng
     * Parsing each line as an object of __Order__ datatype
     * Applying a list of qualifying and calculation rules paris to each order
     * Calculates the final discount of the order
-        ```math
-        Final discount is the average of the top 2 discounts.
-        ```
+        > Final discount is the average of the top 2 discounts.
     * Finally storing orders with *the price before discount* and *the final price after applying the discount* into an `Oracle table`.
 
 * __`CriteriaFunctions`__: Has all the qualifying rules and their corresponding calculation rules.
