@@ -35,7 +35,7 @@ object DiscountEngine extends App{
      * Finally, it writes the order's information with the final price to the database.
      */
     def getOrderWithDiscount(order: Order, listOfRules: List[(Order => Boolean, Order => Double)]): Unit = {
-        val topTwoDiscounts = listOfRules.filter(_._1(order)).map(_._2(order)).take(2)
+        val topTwoDiscounts = listOfRules.filter(_._1(order)).map(_._2(order)).sorted.reverse.take(2)
         val priceBeforeDiscount = BigDecimal((order.quantity * order.unit_price)).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
         if (topTwoDiscounts.isEmpty)
             writeToDB(conn, order, priceBeforeDiscount, priceBeforeDiscount)
@@ -51,7 +51,10 @@ object DiscountEngine extends App{
             (isAboutToExpire, expiryDiscount),
             (isCheeseOrWine, cheeseOrWineDiscount),
             (isOnSpecialDay, specialDayDiscount),
-            (isMoreThanFive, moreThanFiveDiscount))
+            (isMoreThanFive, moreThanFiveDiscount),
+            (isAppUsed, appDiscount),
+            (isVisaUsed, visaDiscount)
+        )
     }
 
     // Call the functions to be run on each order.
