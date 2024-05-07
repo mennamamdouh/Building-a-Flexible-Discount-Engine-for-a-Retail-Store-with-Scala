@@ -72,6 +72,20 @@ In [codes](codes/) directory, there's another `sql` file which is [OrdersTable](
 
 > __Note__: All codes are well-commented and all functions are well-explained using `scaladoc`.
 
+## Logging Functionality ##
+
+It was required to generate a *log* file which logs the engine's events. It's built using `scala-logging` library with the help of [scala-logging](https://github.com/lightbend-labs/scala-logging) repository.
+
+My logging system has `3` loggers, `discount.engine`, `criteria.functions`, and `database.connection`. Also, it has `3` levels of logs, `info`, `debug`, and `error`.
+
+Here's a snapshot of the log file:
+<div align="center">
+  <img src="images/logs-snapshot.png" alt="Image">
+  <p><em>A snapshot from the log file of our Discount Engine</em></p>
+</div>
+
+Click here to explore the whole log file &rarr; [rules_engine.log](rules_engine.log)
+
 ## How to run the project ? ##
 
 1. Download the project folder [DiscountEngine](IntelliJ/DiscountEngine/) under the [IntelliJ](IntelliJ/) directory.
@@ -90,4 +104,4 @@ In [codes](codes/) directory, there's another `sql` file which is [OrdersTable](
 
 5. Replace your database credentials in the [.env](IntelliJ/DiscountEngine/src/main/scala/.env) file, or you can add them inside the [DBConnection](codes/DBConnection.scala) file itself by assigning them to the varibales.
 
-6. Run the code, explore the data inserted into the Orders table inside the database, and enjoy your __Discount Engine__ !
+6. Run the code, explore the data inserted into __Orders__ table in the database, investigate the [log file](rules_engine.log) for any information, and enjoy your __Discount Engine__ !
