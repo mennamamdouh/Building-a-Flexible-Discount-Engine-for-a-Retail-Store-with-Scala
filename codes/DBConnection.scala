@@ -1,10 +1,15 @@
 package discountengine
 
+import com.typesafe.scalalogging.Logger
 import discountengine.DiscountEngine.Order
-import java.sql.DriverManager
+
+import java.sql.{DriverManager, SQLException}
 import io.github.cdimascio.dotenv.Dotenv
 
 object DBConnection {
+    // Begin a logger instance
+    val logger = Logger("database.connection")
+
     def getConnection(): java.sql.Connection = {
         // Load the environment variables
         val dotenv = Dotenv.load()
@@ -17,7 +22,11 @@ object DBConnection {
         val username = dotenv.get("DB_USERNAME")
         val password = dotenv.get("DB_PASSWORD")
         // Return the connection
-        DriverManager.getConnection(jdbcUrl, username, password)
+        try {
+            val connection = DriverManager.getConnection(jdbcUrl, username, password)
+            logger.info("Successfully connected to the database.")
+            connection
+        }
     }
 
     def writeToDB(conn: java.sql.Connection, order: Order, priceBeforeDiscount: Double, finalPrice: Double) {
@@ -34,12 +43,18 @@ object DBConnection {
         statement.setDouble(9, finalPrice)
 
         // Execute the statement
-        statement.executeUpdate()
+        try {
+            statement.executeUpdate()
+            logger.info("Order is added to the database successfully.")
+        } catch {
+            case e: SQLException => logger.error("Cannot add the record to the database.")
+        }
         statement.close()
     }
 
     def closeConnection(conn: java.sql.Connection) = {
         // Close the connection
+        logger.debug("About to close the connection...")
         conn.close()
     }
 }

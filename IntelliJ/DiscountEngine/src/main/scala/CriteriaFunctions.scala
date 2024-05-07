@@ -1,10 +1,14 @@
 package discountengine
+import com.typesafe.scalalogging.Logger
 import discountengine.DiscountEngine.Order
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object CriteriaFunctions {
+    // Begin a logger instance
+    val logger = Logger("criteria.functions")
+
     /** Formats the transaction date of each order.
      *
      * Takes the transaction date as a '''String'''.
@@ -34,11 +38,15 @@ object CriteriaFunctions {
      * Return boolean value, it it's about to expire (less than 30 days) it returns true, else it returns false.
      */
     def isAboutToExpire(order: Order): Boolean = {
+        logger.debug("Checking qualifying rule #1: Expiry date.")
         // Get the difference between transaction date and expiry date
         val daysBetween = (expiryDateFormatter(order.expiry_date).toEpochDay - transactionDateFormatter(order.timestamp).toEpochDay).toInt
         // Check the qualifying rule
         if (daysBetween >= 30) false
-        else true
+        else {
+            logger.info(s"Qualifying rule #1 checked ✔. There are ${daysBetween} days left.")
+            true
+        }
     }
 
     /** Performs the calculation rule number 1: The discount according to the number of days remaining until the product is expired.
@@ -50,6 +58,7 @@ object CriteriaFunctions {
      * Returns the discount value from the total price.
      */
     def expiryDiscount(order: Order): Double = {
+        logger.debug("Applying calculation rule #1.")
         // Get the difference between transaction date and expiry date
         val daysBetween = (expiryDateFormatter(order.expiry_date).toEpochDay - transactionDateFormatter(order.timestamp).toEpochDay).toInt
         // Perform the calculation rule
@@ -63,7 +72,11 @@ object CriteriaFunctions {
      * Returns true if it is a cheese or wine product, and false if not.
      */
     def isCheeseOrWine(order: Order): Boolean = {
-        if (order.product_name.startsWith("Cheese") || order.product_name.startsWith("Wine")) true
+        logger.debug("Checking qualifying rule #2: Cheese or Wine product.")
+        if (order.product_name.startsWith("Cheese") || order.product_name.startsWith("Wine")) {
+            logger.info(s"Qualifying rule #2 checked ✔. Product of type ${order.product_name.split(" ")(0)}.")
+            true
+        }
         else false
     }
 
@@ -75,6 +88,7 @@ object CriteriaFunctions {
      * Returns the discount value from the total price.
      */
     def cheeseOrWineDiscount(order: Order): Double = {
+        logger.debug("Applying calculation rule #2.")
         // Perform the calculation rule after checking the product's category
         if (order.product_name.startsWith("Cheese"))
           BigDecimal(order.quantity * order.unit_price * 0.1).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
@@ -88,7 +102,11 @@ object CriteriaFunctions {
      * Returns true if the transaction day is 23rd March, and false if not.
      */
     def isOnSpecialDay(order: Order): Boolean = {
-        if (transactionDateFormatter(order.timestamp).getDayOfMonth == 23 && transactionDateFormatter(order.timestamp).getMonthValue == 3) true
+        logger.debug("Checking qualifying rule #3: Our special day 23rd March.")
+        if (transactionDateFormatter(order.timestamp).getDayOfMonth == 23 && transactionDateFormatter(order.timestamp).getMonthValue == 3) {
+            logger.debug("Qualifying rule #3 checked ✔. Order has been purchased on 23rd March.")
+            true
+        }
         else false
     }
 
@@ -98,6 +116,7 @@ object CriteriaFunctions {
      * Calculates the discount percentage and returns the discount value from the total price.
      */
     def specialDayDiscount(order: Order): Double = {
+        logger.debug("Applying calculation rule #3.")
         BigDecimal(order.quantity * order.unit_price * 0.5).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     }
 
@@ -107,7 +126,11 @@ object CriteriaFunctions {
      * Returns true if it has more than 5 units of the product, and false if not.
      */
     def isMoreThanFive(order: Order): Boolean = {
-        if (order.quantity > 5) true
+        logger.debug("Checking qualifying rule #4: More than 5 products.")
+        if (order.quantity > 5) {
+            logger.info(s"Qualifying rule #4 checked ✔. It has ${order.quantity} units.")
+            true
+        }
         else false
     }
 
@@ -126,6 +149,7 @@ object CriteriaFunctions {
      * Returns the discount value from the total price.
      */
     def moreThanFiveDiscount(order: Order): Double = {
+        logger.debug("Applying calculation rule #4.")
         if (order.quantity >= 6 && order.quantity <= 9)
           BigDecimal(order.quantity * order.unit_price * 0.05).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
         else if (order.quantity >= 10 && order.quantity <= 14)
@@ -142,7 +166,11 @@ object CriteriaFunctions {
      * Returns true if it's through the App, and false if not.
      */
     def isAppUsed(order: Order): Boolean = {
-        if (order.channel == "App") true
+        logger.debug("Checking qualifying rule #5: Online shopping or via our store.")
+        if (order.channel == "App") {
+            logger.info("Qualifying rule #5 checked ✔. App is used.")
+            true
+        }
         else false
     }
 
@@ -164,6 +192,7 @@ object CriteriaFunctions {
      * Returns the discount value from the total price.
      */
     def appDiscount(order: Order): Double = {
+        logger.debug("Applying calculation rule #5.")
         val discountPerc = (((order.quantity / 5.0).ceil) * 5).toInt
         BigDecimal(order.quantity * order.unit_price * discountPerc / 100.0).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     }
@@ -174,7 +203,11 @@ object CriteriaFunctions {
      * Returns true if the payment method is Visa, and false if not.
      */
     def isVisaUsed(order: Order): Boolean = {
-        if (order.payment_method == "Visa") true
+        logger.debug("Checking qualifying rule #6: Payment with Visa Card or Cash.")
+        if (order.payment_method == "Visa") {
+            logger.info("Qualifying rule #6 checked ✔. Visa Card is used.")
+            true
+        }
         else false
     }
 
@@ -184,6 +217,7 @@ object CriteriaFunctions {
      * Returns the discount value from the total price.
      */
     def visaDiscount(order: Order): Double = {
+        logger.debug("Applying calculation rule #6.")
         BigDecimal(order.quantity * order.unit_price * 0.05).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     }
 }
