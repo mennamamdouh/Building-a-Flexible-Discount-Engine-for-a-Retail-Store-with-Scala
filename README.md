@@ -1,8 +1,28 @@
 # Building-a-Flexible-Discount-Engine-for-a-Retail-Store-with-Scala
 
+## Table of Contents ##
+
+* [Overview](#overview)
+
+* [Business Requirements](#business-requirements)
+
+* [Technical Requirements](#technical-requirements)
+
+* [Data Source](#data-source)
+
+* [Code Explaination](#code-explaination)
+
+* [Logging Functionality](#logging-functionality)
+
+* [How to run the project ?](#how-to-run-the-project-)
+
+---
+
 ## Overview ##
 
 A huge retail store wants a rule engine that qualifies orders' transactions to discounts based on a set of *qualifying rules* and automatically calculates the proper discount based on some *calculation rules*. The program is written in __Scala__ in a pure functional manner.
+
+---
 
 ## Business Requirements ##
 
@@ -21,6 +41,8 @@ __Extra Rules:__
 
 Business also needs a new file that contains all orders' information besides the final price after passing the orders through our discount engine.
 
+---
+
 ## Technical Requirements ##
 
 Our discount engine needs to be written in __Scala__. Scala supports many programming paradigms, *Imperative Programming*, *Functional Programming*, and *OOP*.
@@ -35,7 +57,11 @@ But, to have this discount engine to be more flexible in enhancement, the code n
     * Have a predictable behavior
     * No side effects
 
+Also, a log file is required for the purpose of monitoring the flow of the program and for debugging.
+
 So in this project, I'll to write some code in __Scala__ with *Functional Programming Paradigm* to implement this __Discount Engine__ so that our Retail Store can use it, add discounts to orders, and get their customers' satisfaction!
+
+---
 
 ## Data Source ##
 
@@ -49,6 +75,8 @@ Data source is simply a *csv* file which contains some orders' information such 
 * Payment method &rarr; Cash - Visa
 
 To explore the data and download it please check [TRX1000.csv](data/TRX1000.csv) file.
+
+---
 
 ## Code Explaination ##
 
@@ -72,6 +100,8 @@ In [codes](codes/) directory, there's another `sql` file which is [OrdersTable](
 
 > __Note__: All codes are well-commented and all functions are well-explained using `scaladoc`.
 
+---
+
 ## Logging Functionality ##
 
 It was required to generate a *log* file which logs the engine's events. It's built using `scala-logging` library with the help of [scala-logging](https://github.com/lightbend-labs/scala-logging) repository.
@@ -85,6 +115,8 @@ Here's a snapshot of the log file:
 </div>
 
 Click here to explore the whole log file &rarr; [rules_engine.log](rules_engine.log)
+
+---
 
 ## How to run the project ? ##
 
